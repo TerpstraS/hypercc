@@ -84,7 +84,8 @@ class File(object):
         mask is needed, a normal numpy array is returned.
         """
         data = self.data.variables[var][self.bounds]
-        missing_value = self.data.variables[var].missing_value
+        #_ = self.data.variables[var]
+        missing_value = self.data.variables[var]._FillValue
         masked_data = np.ma.masked_equal(data, missing_value)
         if masked_data.mask is np.ma.nomask:
             return masked_data.data
