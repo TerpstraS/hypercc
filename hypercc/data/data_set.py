@@ -58,9 +58,9 @@ class DataSet(object):
             raise FileNotFoundError(str(Path(path) / pattern))
 
         return DataSet(paths=paths, variable=variable, selection=selection)
-    
+
     @staticmethod
-    def cmip6(path, fname, variable: str, selection=slice(None)):
+    def cmip6(path, variable: str, selection=slice(None)):
         return DataSet([path], variable=variable, selection=selection)
 
     def __serialize__(self, pack):
