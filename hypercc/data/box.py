@@ -119,12 +119,12 @@ class Box:
         except TypeError:
             pass
 
-        kwargs = {self.time_units: value}
+        kwargs = {self.time_units: int(value)}
         try:
             return self.time_start + timedelta(**kwargs)
         except TypeError:
             # Some issue with datatypes for timedelta
-            return self.time_start + timedelta(**int(kwargs))
+            return self.time_start + timedelta(**kwargs)
 
     @property
     def dates(self):
