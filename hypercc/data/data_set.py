@@ -73,7 +73,7 @@ class DataSet(object):
                   ".{extension}".format(
                       model=model, scenario=scenario, realization=realization,
                       frequency=frequency, variable=variable, extension=extension)
-        fpath = Path(os.path.join((path, fname)))
+        fpath = Path(os.path.join(path, fname))
         if not fpath.exists():
             print("File {} not found in directory {}\n".format(
                       fname, path))
