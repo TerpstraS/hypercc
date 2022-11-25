@@ -23,6 +23,7 @@ def run(workflow, db_file='hypercc-cache.db'):
     import multiprocessing
 
     N_CORES = multiprocessing.cpu_count()
+    print("Number of cores is {}.\n".format(N_CORES))
 
     return run_parallel(
         workflow, n_threads=N_CORES, registry=registry,
