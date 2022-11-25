@@ -69,7 +69,7 @@ def make_argument_parser():
         default='r1i1p1', dest='realization')
     report_parser.add_argument(
         "--extension", help="extension to data files (default: %(default)s)",
-        default='nc', dest='extension')
+        default='gr.nc', dest='extension')
     report_parser.add_argument(
         "--annual", help="compute annual mean of data instead of selecting "
         " a single month (--month argument is ignored)", dest='annual',
