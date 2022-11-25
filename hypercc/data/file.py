@@ -97,6 +97,7 @@ class File(object):
 
         # squeeze out extra dimensions so that filter works correctly
         # also make sure it is indeed a masked array
+        ## TODO: change this back after all files are masked
         masked_data = masked_data.squeeze()
         masked_data = np.ma.masked_array(masked_data)
         return masked_data
