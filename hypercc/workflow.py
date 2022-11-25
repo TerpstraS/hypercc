@@ -50,6 +50,7 @@ def open_data_files(config):
         variable=config.variable,
         scenario=config.scenario,
         realization=config.realization,
+        frequency=config.frequency,
         extension=config.extension
     )
 
@@ -68,6 +69,7 @@ def open_pi_control(config):
         variable=config.variable,
         scenario='piControl',
         extension=config.extension,
+        frequency=config.frequency,
         realization=config.realization)
 
     return control_set
