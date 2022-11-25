@@ -44,7 +44,7 @@ def open_data_files(config):
     :param config: namespace object (as returned by argparser)
     :return: DataSet
     """
-    data_set = DataSet.cmip5(
+    data_set = DataSet.cmip6(
         path=config.data_folder,
         model=config.model,
         variable=config.variable,
@@ -57,6 +57,41 @@ def open_data_files(config):
 
 
 def open_pi_control(config):
+    if config.pi_control_folder:
+        pi_control_folder = config.pi_control_folder
+    else:
+        pi_control_folder = config.data_folder
+
+    control_set = DataSet.cmip6(
+        path=pi_control_folder,
+        model=config.model,
+        variable=config.variable,
+        scenario='piControl',
+        extension=config.extension,
+        realization=config.realization)
+
+    return control_set
+
+
+def open_data_files_cmip5(config):
+    """Open data files from the settings given in `config`.
+
+    :param config: namespace object (as returned by argparser)
+    :return: DataSet
+    """
+    data_set = DataSet.cmip5(
+        path=config.data_folder,
+        model=config.model,
+        variable=config.variable,
+        scenario=config.scenario,
+        realization=config.realization,
+        extension=config.extension
+    )
+
+    return data_set
+
+
+def open_pi_control_cmip5(config):
     if config.pi_control_folder:
         pi_control_folder = config.pi_control_folder
     else:
@@ -169,13 +204,13 @@ def get_thresholds(config, calibration):
         'pi-control-3': mag_quartiles[3],
         'pi-control-max': mag_quartiles[4],
     }
-    
+
     ref_lower=ref_values[config.lower_threshold_ref]
     ref_upper=ref_values[config.upper_threshold_ref]
-    
+
     frac_lower=float(config.lower_threshold_frac[0])
     frac_upper=float(config.upper_threshold_frac[0])
-    
+
     return ref_lower*frac_lower, ref_upper*frac_upper
 
 
@@ -281,7 +316,7 @@ def compute_measure15j(mask, years, data, cutoff_length, chunk_max_length, chunk
     indices=np.asarray(idx)
 
     measure15j_3d=mask*0.0
-    
+
     shapeidx=np.shape(idx)
     nofresults=shapeidx[1]
 
@@ -294,7 +329,7 @@ def compute_measure15j(mask, years, data, cutoff_length, chunk_max_length, chunk
 
                 # determine last index of first chunk, and first index of second chunk
                 # this takes into account how many points aroung the abrupt shift under
-                # consideration are removed, and whether there are other abrupt shifts 
+                # consideration are removed, and whether there are other abrupt shifts
                 #in the vicinity
 
                 # first, remove cutoff length (called ctrans in paper)
@@ -304,7 +339,7 @@ def compute_measure15j(mask, years, data, cutoff_length, chunk_max_length, chunk
                 chunk2_years=years[index+cutoff_length+1:]
                 chunk1_mask=mask[0:index-cutoff_length,dim1,dim2]
                 chunk2_mask=mask[index+cutoff_length+1:,dim1,dim2]
-    
+
                 if np.size(chunk1_data) > chunk_max_length:
                     chunk1_start=np.size(chunk1_data)-chunk_max_length
                 else:
@@ -313,11 +348,11 @@ def compute_measure15j(mask, years, data, cutoff_length, chunk_max_length, chunk
                     chunk2_end=chunk_max_length
                 else:
                     chunk2_end=np.size(chunk2_data)
-    
+
                 chunk1_data_short=chunk1_data[chunk1_start:]
                 chunk2_data_short=chunk2_data[0:chunk2_end]
                 chunk1_mask_short=chunk1_mask[chunk1_start:]
-                chunk2_mask_short=chunk2_mask[0:chunk2_end]    	    
+                chunk2_mask_short=chunk2_mask[0:chunk2_end]
                 chunk1_years_short=chunk1_years[chunk1_start:]-years[dim0]
                 chunk2_years_short=chunk2_years[0:chunk2_end]-years[dim0]
 
@@ -328,7 +363,7 @@ def compute_measure15j(mask, years, data, cutoff_length, chunk_max_length, chunk
                     index_edges = np.where(chunk1_mask_short)   # locate all other edges in chunk 1
                     index_edge=np.max(index_edges)        # take the last one (closest to abrupt shift under consideration here)
                     if index_edge + cutoff_length >= np.size(chunk1_data_short):   # also consider the cutoff length for that other edge
-                        chunk1_data_short=[]                    
+                        chunk1_data_short=[]
                     else:
                         chunk1_data_short=chunk1_data_short[index_edge+cutoff_length:]
                         chunk1_years_short=chunk1_years_short[index_edge+cutoff_length:]
@@ -338,25 +373,25 @@ def compute_measure15j(mask, years, data, cutoff_length, chunk_max_length, chunk
                     index_edges = np.where(chunk2_mask_short)   # locate all other edges in chunk 1
                     index_edge=np.min(index_edges)        # take the last one (closest to abrupt shift under consideration here)
                     if index_edge - cutoff_length < 0 :   # also consider the cutoff length for that other edge
-                        chunk2_data_short=[]                    
+                        chunk2_data_short=[]
                     else:
                         chunk2_data_short=chunk2_data_short[0:index_edge-cutoff_length]
                         chunk2_years_short=chunk2_years_short[0:index_edge-cutoff_length]
-                        
-    	    
+
+
                 N1=np.size(chunk1_data_short)
                 N2=np.size(chunk2_data_short)
-    
+
                 if not ((N1 < chunk_min_length) or (N2 < chunk_min_length)):
-    
+
                     slope_chunk1, intercept_chunk1, r_value, p_value, std_err = stats.linregress(chunk1_years_short, chunk1_data_short)
                     chunk1_regline=intercept_chunk1 + slope_chunk1*chunk1_years_short
-    
+
                     slope_chunk2, intercept_chunk2, r_value, p_value, std_err = stats.linregress(chunk2_years_short, chunk2_data_short)
                     chunk2_regline=intercept_chunk2 + slope_chunk2*chunk2_years_short
-    
+
                     mean_std=(np.nanstd(chunk1_data_short)+np.nanstd(chunk2_data_short))/2
-    		
+
                     if mean_std == 0:
                         mean_chunk1=np.mean(chunk1_data_short)
                         mean_chunk2=np.mean(chunk2_data_short)
@@ -366,12 +401,12 @@ def compute_measure15j(mask, years, data, cutoff_length, chunk_max_length, chunk
                             measure15j_3d[dim0,dim1,dim2]=9e99
                     else:
                         measure15j_3d[dim0,dim1,dim2]=abs(intercept_chunk1-intercept_chunk2)/mean_std
-        
+
     measure15j=np.max(measure15j_3d,axis=0)
     measure15j[np.isnan(measure15j)]=0
     indices_mask=np.where(measure15j>np.max(measure15j))  # set missing values to 0
     measure15j[indices_mask]=0                            # otherwise they show on map
-    
+
     return {
         'measure15j_3d': measure15j_3d,
 	'measure15j':    measure15j
@@ -431,9 +466,9 @@ def generate_timeseries_plot(config, box, data, abruptness, abruptness_3d, title
         if config.taper and isinstance(data, np.ma.core.MaskedArray):
             taper_masked_area(data, [0, 5, 5], 50)
         smooth_data = gaussian_filter(box, data, [sigma_t, sigma_x, sigma_x])
- 	
+
         ts_smooth=smooth_data[:,latind,lonind]
-    
+
         ax.plot(years, ts, 'k', years, ts_smooth, 'b--')
 
         ### show abruptness of that time series
@@ -494,7 +529,7 @@ def generate_region_plot(box, mask, title, filename, min_size=0):
 @noodles.schedule(store=False,call_by_ref=['mask'])
 @noodles.maybe
 def generate_scatter_plot(mask,sb,colourdata,sizedata,colourbarlabel,gamma,lower_threshold,upper_threshold,title,filename):
-    
+
         ### obtain location of edges in space and time, the magnitude of the gradients and their abruptness
         ## arrays with data from the points with edges (mask==1)
         idx    = np.where(mask)
@@ -504,10 +539,10 @@ def generate_scatter_plot(mask,sb,colourdata,sizedata,colourbarlabel,gamma,lower
         sgrad = np.sqrt(sobel[1]**2 + sobel[2]**2) / gamma
         sgrad = sgrad/sobel[3]*1000    # scale to 1000 km
         tgrad = sobel[0]/sobel[3]*10      # scale to 10 years
-    
+
         #### sort the input in order to show most abrupt ones on top of the others in scatter plot
         inds = np.argsort(coldata)
-    
+
         ######## plot
         import matplotlib
         my_cmap = matplotlib.cm.get_cmap('rainbow')
@@ -516,21 +551,21 @@ def generate_scatter_plot(mask,sb,colourdata,sizedata,colourbarlabel,gamma,lower
         ax=plt.subplot(111)
         matplotlib.rc('xtick', labelsize=16)
         matplotlib.rc('ytick', labelsize=16)
-        
+
         #### ellipses showing the threshold values of hysteresis thresholding
         dp = np.linspace(-np.pi/2, np.pi/2, 100)
         dt = upper_threshold * np.sin(dp) * 10
         dx = upper_threshold * np.cos(dp) / gamma * 1000
-    
+
         # ellipse showing the aspect ratio. for scaling_factor=1 would be a circle
         # the radius of that circle is the upper threshold
         plt.plot(dx, dt, c='k')
-    
+
         ## ellipse based on the lower threshold:
         dt = lower_threshold * np.sin(dp) * 10
         dx = lower_threshold * np.cos(dp) / gamma * 1000
         plt.plot(dx, dt, c='k')
-    
+
         #data
         plt.scatter(sgrad[inds], tgrad[inds],s=sizdata[inds]**2,c=coldata[inds], marker = 'o', cmap =my_cmap );
         cbar=plt.colorbar()
@@ -538,17 +573,17 @@ def generate_scatter_plot(mask,sb,colourdata,sizedata,colourbarlabel,gamma,lower
         matplotlib.rcParams.update({'font.size': 16})
         ax.set_xlabel('spatial gradient in units / 1000 km')
         ax.set_ylabel('temporal gradient in units / decade')
-    
+
         #### set axis ranges
         border=0.05
         Smin=np.min(sgrad)-(np.max(sgrad)-np.min(sgrad))*border
         Smax=np.max(sgrad)+(np.max(sgrad)-np.min(sgrad))*border
         Tmin=np.min(tgrad)-(np.max(tgrad)-np.min(tgrad))*border
         Tmax=np.max(tgrad)+(np.max(tgrad)-np.min(tgrad))*border
-    
+
         ax.set_xlim(Smin, Smax)
         ax.set_ylim(Tmin, Tmax)
-   
+
         #fig.suptitle(title)
         fig.savefig(str(filename), bbox_inches='tight')
         return Path(filename)
@@ -602,31 +637,31 @@ def generate_event_count_timeseries_plot(box, mask, title, filename):
 @noodles.maybe
 def make_report(config, data_set, calibration, canny_edges):
     output_path  = Path(config.output_folder)
-    
+
     gamma = get_calibration_factor(config, calibration)
     years = np.array([dd.year for dd in data_set.box.dates])
     #years_timeseries_out = write_ts(years, output_path / "years_timeseries.txt")
 
     mask=canny_edges['edges']
     event_count=mask.sum(axis=0)
-    
+
     lower_threshold, upper_threshold = get_thresholds(config, calibration)
     years3d=years[:,None,None]*mask
     lats=data_set.box.lat
     lats3d=lats[None,:,None]*mask
     lons=data_set.box.lon
     lons3d=lons[None,None,:]*mask
-    
+
     maxTgrad      = compute_maxTgrad(canny_edges)
-    
+
     ## abruptness
     measures      = compute_measure15j(mask, years, data_set.data, 2, 30, 15)
     abruptness_3d = measures['measure15j_3d']
     abruptness    = measures['measure15j']
 
     years_maxabrupt = compute_years_maxabrupt(data_set.box, mask, abruptness_3d, abruptness)
-    
-    event_count_timeseries = mask.sum(axis=1).sum(axis=1)  
+
+    event_count_timeseries = mask.sum(axis=1).sum(axis=1)
 
     signal_plot  = generate_signal_plot(
         config, calibration, data_set.box, canny_edges['sobel'], "signal",
@@ -653,7 +688,7 @@ def make_report(config, data_set, calibration, canny_edges):
 
     year_plot    = generate_year_plot(
         data_set.box, years_maxabrupt, "year of largest abruptness",
-        output_path / "years_maxabrupt.png")    
+        output_path / "years_maxabrupt.png")
     scatter_plot_abrupt=generate_scatter_plot(
         mask,canny_edges['sobel'],abruptness_3d,abruptness_3d,"abruptness",gamma,lower_threshold,
         upper_threshold,"space versus time gradients", output_path / "scatter_abruptness.png")
@@ -668,15 +703,15 @@ def make_report(config, data_set, calibration, canny_edges):
         upper_threshold,"space versus time gradients",output_path / "scatter_longitude.png")
 
     maxTgrad_out             = write_netcdf_2d(maxTgrad, output_path / "maxTgrad.nc")
-    
+
     abruptness_out      = write_netcdf_2d(abruptness, output_path / "abruptness.nc")
-   
+
     years_maxabrupt_out = write_netcdf_2d(years_maxabrupt, output_path / "years_maxabrupt.nc")
     event_count_out          = write_netcdf_2d(event_count, output_path / "event_count.nc")
     event_count_timeseries_out = write_ts(event_count_timeseries, output_path / "event_count_timeseries.txt")
 
     edge_mask_out      = write_netcdf_3d(mask, output_path / "edge_mask_detected.nc")
-    
+
     return noodles.lift({
         'calibration': calibration,
         'statistics': {

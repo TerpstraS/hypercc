@@ -1,7 +1,7 @@
 """
 Handles a series of NetCDF files.
 """
-
+import os
 from pathlib import Path
 from copy import copy
 
@@ -60,8 +60,25 @@ class DataSet(object):
         return DataSet(paths=paths, variable=variable, selection=selection)
 
     @staticmethod
-    def cmip6(path, variable: str, selection=slice(None)):
-        return DataSet([path], variable=variable, selection=selection)
+    def cmip6(path, model: str, variable: str, scenario: str,
+              realization: str, extension="gr.nc", selection=slice(None)):
+        """Opposed to the cmip5() method, this method assumes just a single file
+        containing all the data (i.e., "aggregated" data). It still returns a
+        list of file paths instead of a single file path. This is done to remain
+        compatible with rest of the code without the need of rewriting the whole data
+        subpackage.
+        """
+        fname = "CMIP.{model}.{scenario}.{realization}.{frequency}.{variable}" \
+                  ".{extension}".format(
+                      model=model, scenario=scenario, realization=realization,
+                      frequency=frequency, variable=variable, extension=extension)
+        fpath = Path(os.path.join((path, fname)))
+        if not fpath.exists():
+            print("File {} not found in directory {}\n".format(
+                      fname, path))
+            raise FileNotFoundError(str(fpath))
+
+        return DataSet(paths=[fpath], variable=variable, selection=selection)
 
     def __serialize__(self, pack):
         return pack({
