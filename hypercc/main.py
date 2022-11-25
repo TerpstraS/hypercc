@@ -68,6 +68,10 @@ def make_argument_parser():
         "(default: %(default)s)",
         default='r1i1p1', dest='realization')
     report_parser.add_argument(
+        "--frequency", help="frequency name (table_id)",
+        required=True, dest="frequency"
+    )
+    report_parser.add_argument(
         "--extension", help="extension to data files (default: %(default)s)",
         default='gr.nc', dest='extension')
     report_parser.add_argument(

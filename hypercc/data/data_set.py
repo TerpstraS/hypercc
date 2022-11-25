@@ -61,7 +61,8 @@ class DataSet(object):
 
     @staticmethod
     def cmip6(path, model: str, variable: str, scenario: str,
-              realization: str, extension="gr.nc", selection=slice(None)):
+              realization: str, frequency=frequency, extension="gr.nc",
+              selection=slice(None)):
         """Opposed to the cmip5() method, this method assumes just a single file
         containing all the data (i.e., "aggregated" data). It still returns a
         list of file paths instead of a single file path. This is done to remain
