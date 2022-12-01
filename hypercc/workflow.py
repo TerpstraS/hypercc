@@ -423,6 +423,8 @@ def write_netcdf_2d(field, filename):
     ncfile.variables['outdata'][0,:,:]=field
     ncfile.close()
 
+@noodles.schedule
+@noodles.maybe
 def write_netcdf_3d(field, filename):
     import netCDF4
     ncfile = netCDF4.Dataset(filename, "a", format="NETCDF4")
