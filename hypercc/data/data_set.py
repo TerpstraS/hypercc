@@ -143,11 +143,12 @@ class DataSet(object):
             try:
                 lat_bnds = self.files[0].lat_bnds
                 lon_bnds = self.files[0].lon_bnds
-
+                print(lat_bnds)
+                print(lon_bnds)
                 # some files in CMIP5 have unexpected bounds
-                lon_bnds = np.where(
-                    (abs(lon_bnds[:, 1] - lon_bnds[:, 0]) > 180)[:, None],
-                    lon_bnds + [-180, 180], lon_bnds)
+                # lon_bnds = np.where(
+                #     (abs(lon_bnds[:, 1] - lon_bnds[:, 0]) > 180)[:, None],
+                #     lon_bnds + [-180, 180], lon_bnds)
 
             except KeyError:
                 lat_bnds = np.zeros(shape=(len(lat), 2), dtype='float32')
