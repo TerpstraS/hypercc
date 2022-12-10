@@ -121,6 +121,9 @@ def make_argument_parser():
     report_parser.add_argument(
         "--no-taper", help="taper data to handle land/sea mask.",
         dest='taper', action='store_false')
+    report_parser.add_argument(
+        "--n-cores", help="number of cores available",
+        dest='n_cores', default=1)
 
     return parser
 
@@ -147,7 +150,7 @@ if __name__ == "__main__":
         if args.single:
             results = run_single(workflow)
         else:
-            results = run(workflow)
+            results = run(workflow, int(args.n_cores))
 
         if results:
             print(results['calibration'])

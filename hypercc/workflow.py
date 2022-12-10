@@ -17,16 +17,16 @@ from .filters import gaussian_filter, sobel_filter, taper_masked_area
 from .calibration import calibrate_sobel
 from .plotting import plot_signal_histogram, plot_plate_carree
 
-def run(workflow, db_file='hypercc-cache.db'):
+def run(workflow, n_cores=1, db_file='hypercc-cache.db'):
     from noodles.run.threading.sqlite3 import run_parallel
     from .serialisers import registry
     import multiprocessing
 
-    N_CORES = multiprocessing.cpu_count()
-    print("Number of cores is {}.\n".format(N_CORES))
+    # N_CORES = multiprocessing.cpu_count()
+    print("Number of cores is {}.\n".format(n_cores))
 
     return run_parallel(
-        workflow, n_threads=N_CORES, registry=registry,
+        workflow, n_threads=n_cores, registry=registry,
         db_file=db_file, always_cache=False,
         echo_log=False)
 
