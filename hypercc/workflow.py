@@ -20,6 +20,10 @@ def run(workflow):
     return workflow
 
 
+def run_single(workflow):
+    return workflow
+
+
 def open_data_files(config):
     """Open data files from the settings given in `config`.
 

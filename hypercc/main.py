@@ -1,7 +1,7 @@
 import warnings
 import sys
 import locale
-import noodles
+# import noodles
 import argparse
 
 from .workflow import generate_report, run, run_single
@@ -137,7 +137,7 @@ if __name__ == "__main__":
 
     print_nlesc_logo()
     logging.getLogger('root').setLevel(logging.WARNING)
-    logging.getLogger('noodles').setLevel(logging.WARNING)
+    # logging.getLogger('noodles').setLevel(logging.WARNING)
     logging.info("This message should show.")
 
     parser = make_argument_parser()
@@ -150,18 +150,18 @@ if __name__ == "__main__":
         if args.single:
             results = run_single(workflow)
         else:
-            results = run(workflow, int(args.n_cores))
+            results = run(workflow)
 
         if results:
             print(results['calibration'])
             print()
 
-            for name, result in results.items():
-                if noodles.failed(result):
-                    print("==========================================")
-                    print("Result {} failed: {}".format(name, result))
-                    print("==========================================")
-                    print()
+            # for name, result in results.items():
+            #     if noodles.failed(result):
+            #         print("==========================================")
+            #         print("Result {} failed: {}".format(name, result))
+            #         print("==========================================")
+            #         print()
             print("max maxTgrad:", results['statistics']['max_maxTgrad'])
             print("max abruptness:", results['statistics']['max_abruptness'])
 
