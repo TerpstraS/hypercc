@@ -828,7 +828,6 @@ def make_report(config, data_set, calibration, canny_edges):
         },
         'signal_plot': signal_plot,
         'region_plot': region_plot,
-        'maxTgrad_out': maxTgrad_out,
 
         'year_plot': year_plot,
         'event_count_plot': event_count_plot,
