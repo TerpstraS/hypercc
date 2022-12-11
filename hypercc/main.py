@@ -121,9 +121,6 @@ def make_argument_parser():
     report_parser.add_argument(
         "--no-taper", help="taper data to handle land/sea mask.",
         dest='taper', action='store_false')
-    report_parser.add_argument(
-        "--n-cores", help="number of cores available",
-        dest='n_cores', default=1)
 
     return parser
 
