@@ -801,21 +801,21 @@ def make_report(config, data_set, calibration, canny_edges):
         config, data_set.box, data_set.data, abruptness, abruptness_3d, "data at grid cell with largest abruptness",
         output_path / "timeseries.png")
 
-    year_plot    = generate_year_plot(
-        data_set.box, years_maxabrupt, "year of largest abruptness",
-        output_path / "years_maxabrupt.png")
-    scatter_plot_abrupt=generate_scatter_plot(
-        mask,canny_edges['sobel'],abruptness_3d,abruptness_3d,"abruptness",gamma,lower_threshold,
-        upper_threshold,"space versus time gradients", output_path / "scatter_abruptness.png")
-    scatter_plot_years=generate_scatter_plot(
-        mask,canny_edges['sobel'],years3d,abruptness_3d,"year",gamma,lower_threshold,
-        upper_threshold,"space versus time gradients",output_path / "scatter_year.png")
-    scatter_plot_lats=generate_scatter_plot(
-        mask,canny_edges['sobel'],lats3d,abruptness_3d,"latitude",gamma,lower_threshold,
-        upper_threshold,"space versus time gradients",output_path / "scatter_latitude.png")
-    scatter_plot_lons=generate_scatter_plot(
-        mask,canny_edges['sobel'],lons3d,abruptness_3d,"longitude",gamma,lower_threshold,
-        upper_threshold,"space versus time gradients",output_path / "scatter_longitude.png")
+    # year_plot    = generate_year_plot(
+    #     data_set.box, years_maxabrupt, "year of largest abruptness",
+    #     output_path / "years_maxabrupt.png")
+    # scatter_plot_abrupt=generate_scatter_plot(
+    #     mask,canny_edges['sobel'],abruptness_3d,abruptness_3d,"abruptness",gamma,lower_threshold,
+    #     upper_threshold,"space versus time gradients", output_path / "scatter_abruptness.png")
+    # scatter_plot_years=generate_scatter_plot(
+    #     mask,canny_edges['sobel'],years3d,abruptness_3d,"year",gamma,lower_threshold,
+    #     upper_threshold,"space versus time gradients",output_path / "scatter_year.png")
+    # scatter_plot_lats=generate_scatter_plot(
+    #     mask,canny_edges['sobel'],lats3d,abruptness_3d,"latitude",gamma,lower_threshold,
+    #     upper_threshold,"space versus time gradients",output_path / "scatter_latitude.png")
+    # scatter_plot_lons=generate_scatter_plot(
+    #     mask,canny_edges['sobel'],lons3d,abruptness_3d,"longitude",gamma,lower_threshold,
+    #     upper_threshold,"space versus time gradients",output_path / "scatter_longitude.png")
 
     event_count_timeseries_out = write_ts(event_count_timeseries, output_path / "event_count_timeseries.txt")
 
@@ -828,18 +828,13 @@ def make_report(config, data_set, calibration, canny_edges):
         },
         'signal_plot': signal_plot,
         'region_plot': region_plot,
-
-        'year_plot': year_plot,
+        
         'event_count_plot': event_count_plot,
         'event_count_timeseries_plot': event_count_timeseries_plot,
         'maxTgrad_plot': maxTgrad_plot,
 
         'abruptness_plot': abruptness_plot,
         'timeseries_plot': timeseries_plot,
-        'scatter_plot_abrupt': scatter_plot_abrupt,
-        'scatter_plot_years': scatter_plot_years,
-        'scatter_plot_lats': scatter_plot_lats,
-        'scatter_plot_lons': scatter_plot_lons,
         'event_count_timeseries_out': event_count_timeseries_out,
     })
 
