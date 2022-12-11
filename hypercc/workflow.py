@@ -7,7 +7,6 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy import ndimage
-import noodles
 
 from hyper_canny import cp_edge_thinning, cp_double_threshold
 
@@ -17,27 +16,8 @@ from .filters import gaussian_filter, sobel_filter, taper_masked_area
 from .calibration import calibrate_sobel
 from .plotting import plot_signal_histogram, plot_plate_carree
 
-def run(workflow, n_cores=1, db_file='hypercc-cache.db'):
-    from noodles.run.threading.sqlite3 import run_parallel
-    from .serialisers import registry
-    import multiprocessing
-
-    N_CORES = multiprocessing.cpu_count()
-    print(N_CORES)
-    print("Number of cores is {}.\n".format(n_cores))
-
-    return run_parallel(
-        workflow, n_threads=n_cores, registry=registry,
-        db_file=db_file, always_cache=False,
-        echo_log=False)
-
-
-def run_single(workflow, db_file='hypercc-cache.db'):
-    from noodles.run.single.sqlite3 import run_single
-    from .serialisers import registry
-    return run_single(
-        workflow, registry=registry,
-        db_file=db_file, always_cache=False)
+def run(workflow):
+    return workflow
 
 
 def open_data_files(config):
@@ -112,21 +92,16 @@ def open_pi_control_cmip5(config):
     return control_set
 
 
-@noodles.schedule(call_by_ref=['data_set'])
-@noodles.maybe
 def select_month(config, data_set):
     month = month_index(config.month)
     return data_set[month::12]
 
 
-@noodles.schedule(call_by_ref=['data_set'])
-@noodles.maybe
 def annual_mean(data_set):
     print("Computing annual mean.")
     return data_set.annual_mean()
 
 
-@noodles.schedule(call_by_ref=['data_set'])
 def compute_calibration(config, data_set):
     quartile = ['min', '1st', 'median', '3rd', 'max'] \
         .index(config.calibration_quartile)
@@ -148,10 +123,8 @@ def compute_calibration(config, data_set):
         print("    tapering on")
         taper_masked_area(data, [0, 5, 5], 50)
 
-    smooth_data = noodles.schedule(gaussian_filter, call_by_ref=['data'])(
-        box, data, [sigma_t, sigma_x, sigma_x])
-    calibration = noodles.schedule(calibrate_sobel, call_by_ref=['data'])(
-        quartile, box, smooth_data, sobel_delta_t, sobel_delta_x)
+    smooth_data = gaussian_filter(box, data, [sigma_t, sigma_x, sigma_x])
+    calibration = calibrate_sobel(quartile, box, smooth_data, sobel_delta_t, sobel_delta_x)
 
     return calibration
 
@@ -179,8 +152,6 @@ def get_sobel_weights(config, calibration):
     return [sobel_delta_t, sobel_delta_x, sobel_delta_x]
 
 
-@noodles.schedule
-@noodles.maybe
 def generate_signal_plot(
         config, calibration, box, sobel_data, title, filename):
     lower, upper = get_thresholds(config, calibration)
@@ -189,8 +160,7 @@ def generate_signal_plot(
     fig.savefig(str(filename), bbox_inches='tight')
     return Path(filename)
 
-@noodles.schedule(call_by_ref=['sobel_data'])
-@noodles.maybe
+
 def maximum_suppression(sobel_data):
     print("transposing data")
     trdata = sobel_data.transpose([3, 2, 1, 0]).copy()
@@ -218,8 +188,6 @@ def get_thresholds(config, calibration):
     return ref_lower*frac_lower, ref_upper*frac_upper
 
 
-@noodles.schedule(call_by_ref=['sobel_data', 'mask'])
-@noodles.maybe
 def hysteresis_thresholding(config, sobel_data, mask, calibration):
     lower, upper = get_thresholds(config, calibration)
     print('    thresholds:', lower, upper)
@@ -231,28 +199,22 @@ def hysteresis_thresholding(config, sobel_data, mask, calibration):
     return new_mask.transpose([2, 1, 0])
 
 
-@noodles.schedule(call_by_ref=['edges', 'mask'])
-@noodles.maybe
 def apply_mask_to_edges(edges, mask, time_margin):
     edges[:time_margin] = 0
     edges[-time_margin:] = 0
     return edges * ~mask
 
 
-@noodles.schedule(call_by_ref=['x', 'y'])
 def transfer_magnitudes(x, y):
     x[3] = y[3]
     return x
 
 
-@noodles.schedule(call_by_ref=['sobel_data'])
 def max_signal(sobel_data):
     """Compute the maximum signal."""
     return 1. / sobel_data[-1].min()
 
 
-@noodles.schedule(call_by_ref=['data_set'])
-@noodles.maybe
 def compute_canny_edges(config, data_set, calibration):
     print("computing canny edges")
     data = data_set.data
@@ -292,13 +254,9 @@ def compute_canny_edges(config, data_set, calibration):
 
     edges = hysteresis_thresholding(config, sobel_data, sobel_maxima, calibration)
 
-    return noodles.gather_dict(
-        sobel=sobel_data,
-        edges=edges)
+    return dict(sobel=sobel_data, edges=edges)
 
 
-@noodles.schedule
-@noodles.maybe
 def compute_maxTgrad(canny):
     tgrad = canny['sobel'][0]/canny['sobel'][3]       # unit('1/year');
     tgrad_residual = tgrad - np.mean(tgrad, axis=0)   # remove time mean
@@ -310,9 +268,8 @@ def compute_maxTgrad(canny):
     maxTgrad[indices_mask]=0                          # otherwise they show on map
     return maxTgrad
 
-### There are many possible ways to quantify abruptness. This one has been labeled "measure 15j" during the testing:
-@noodles.schedule(call_by_ref=['mask'])
-@noodles.maybe
+### There are many possible ways to quantify abruptness.
+# This one has been labeled "measure 15j" during the testing:
 def compute_measure15j(mask, years, data, cutoff_length, chunk_max_length, chunk_min_length):
     from scipy import stats
 
@@ -416,16 +373,14 @@ def compute_measure15j(mask, years, data, cutoff_length, chunk_max_length, chunk
 	'measure15j':    measure15j
     }
 
-@noodles.schedule
-@noodles.maybe
+
 def write_netcdf_2d(field, filename):
     import netCDF4
     ncfile = netCDF4.Dataset(filename, "a", format="NETCDF4")
     ncfile.variables['outdata'][0,:,:]=field
     ncfile.close()
 
-@noodles.schedule
-@noodles.maybe
+
 def write_netcdf_3d(field, filename):
     import netCDF4
     ncfile = netCDF4.Dataset(filename, "a", format="NETCDF4")
@@ -433,15 +388,12 @@ def write_netcdf_3d(field, filename):
     ncfile.close()
 
 
-@noodles.schedule
-@noodles.maybe
 def write_ts(ts, filename):
    file = open(str(filename),'w')
    np.savetxt(file, ts, fmt='%s', delimiter=" ")
    file.close()
 
-@noodles.schedule
-@noodles.maybe
+
 def generate_standard_map_plot(box, field, title, filename):
     import matplotlib
     my_cmap = matplotlib.cm.get_cmap('rainbow')
@@ -454,8 +406,7 @@ def generate_standard_map_plot(box, field, title, filename):
     fig.savefig(str(filename), bbox_inches='tight')
     return Path(filename)
 
-@noodles.schedule(call_by_ref=['abruptness','abruptness_3d'])
-@noodles.maybe
+
 def generate_timeseries_plot(config, box, data, abruptness, abruptness_3d, title, filename):
     import matplotlib
     sigma_t, sigma_x = get_sigmas(config)
@@ -499,21 +450,19 @@ def generate_timeseries_plot(config, box, data, abruptness, abruptness_3d, title
         fig.savefig(str(filename), bbox_inches='tight')
         return Path(filename)
 
-@noodles.schedule(call_by_ref=['mask'])
-@noodles.maybe
+
 def label_regions(mask, min_size=0):
     labels, n_features = ndimage.label(
         mask, ndimage.generate_binary_structure(3, 3))
     big_enough = [x for x in range(1, n_features+1)
                   if (labels == x).sum() > min_size]
-    return noodles.gather_dict(
+    return dict(
         n_features=n_features,
         regions=np.where(np.isin(labels, big_enough), labels, 0),
-        labels=big_enough)
+        labels=big_enough
+    )
 
 
-@noodles.schedule(call_by_ref=['mask'])
-@noodles.maybe
 def generate_region_plot(box, mask, title, filename, min_size=0):
     import matplotlib
     my_cmap = matplotlib.cm.get_cmap('rainbow')
@@ -532,8 +481,6 @@ def generate_region_plot(box, mask, title, filename, min_size=0):
         return Path(filename)
 
 
-@noodles.schedule(store=False,call_by_ref=['mask'])
-@noodles.maybe
 def generate_scatter_plot(mask,sb,colourdata,sizedata,colourbarlabel,gamma,lower_threshold,upper_threshold,title,filename):
 
         ### obtain location of edges in space and time, the magnitude of the gradients and their abruptness
@@ -595,9 +542,6 @@ def generate_scatter_plot(mask,sb,colourdata,sizedata,colourbarlabel,gamma,lower
         return Path(filename)
 
 
-
-@noodles.schedule(call_by_ref=['mask'])
-@noodles.maybe
 def compute_years_maxabrupt(box, mask, abruptness_3d, abruptness):
     idx=np.where(mask)
     indices=np.asarray(idx)
@@ -613,8 +557,6 @@ def compute_years_maxabrupt(box, mask, abruptness_3d, abruptness):
     return years_maxabrupt
 
 
-@noodles.schedule
-@noodles.maybe
 def generate_year_plot(box, years_maxabrupt, title, filename):
     import matplotlib
     my_cmap = matplotlib.cm.get_cmap('rainbow')
@@ -627,8 +569,7 @@ def generate_year_plot(box, years_maxabrupt, title, filename):
     fig.savefig(str(filename), bbox_inches='tight')
     return Path(filename)
 
-@noodles.schedule(call_by_ref=['mask'])
-@noodles.maybe
+
 def generate_event_count_timeseries_plot(box, mask, title, filename):
     fig = plt.figure()
     ax=plt.subplot(111)
@@ -748,8 +689,7 @@ def generate_event_count_timeseries_plot(box, mask, title, filename):
 #         'edge_mask_out': edge_mask_out
 #     })
 
-@noodles.schedule(call_by_ref=['data_set', 'canny_edges'])
-@noodles.maybe
+
 def make_report(config, data_set, calibration, canny_edges):
     output_path  = Path(config.output_folder)
 
@@ -819,7 +759,7 @@ def make_report(config, data_set, calibration, canny_edges):
 
     event_count_timeseries_out = write_ts(event_count_timeseries, output_path / "event_count_timeseries.txt")
 
-    return noodles.lift({
+    return {
         'calibration': calibration,
         'statistics': {
             'max_maxTgrad': maxTgrad.max(),
@@ -828,7 +768,7 @@ def make_report(config, data_set, calibration, canny_edges):
         },
         'signal_plot': signal_plot,
         'region_plot': region_plot,
-        
+
         'event_count_plot': event_count_plot,
         'event_count_timeseries_plot': event_count_timeseries_plot,
         'maxTgrad_plot': maxTgrad_plot,
@@ -836,7 +776,7 @@ def make_report(config, data_set, calibration, canny_edges):
         'abruptness_plot': abruptness_plot,
         'timeseries_plot': timeseries_plot,
         'event_count_timeseries_out': event_count_timeseries_out,
-    })
+    }
 
 def generate_report(config):
     output_path = Path(config.output_folder)
