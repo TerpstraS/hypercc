@@ -161,7 +161,13 @@ def generate_signal_plot(
     lower, upper = get_thresholds(config, calibration)
     fig = plot_signal_histogram(box, 1 / sobel_data[3], lower, upper)
     fig.suptitle(title, fontsize=20)
-    fig.savefig(str(filename), bbox_inches='tight')
+    try:
+        fig.savefig(str(filename), bbox_inches='tight')
+    except ValueError:
+        # save some mock data to prevent crashing of program
+        fig = plt.figure()
+        plt.plot([0, 1], [0, 1])
+        fig.savefig(str(filename), bbox_inches='tight')
     return Path(filename)
 
 
