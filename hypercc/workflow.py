@@ -5,6 +5,7 @@ Implements the HyperCanny workflow for climate data.
 from pathlib import Path
 
 import matplotlib.pyplot as plt
+import cartopy.crs as ccrs
 import numpy as np
 from scipy import ndimage
 
@@ -423,7 +424,7 @@ def generate_standard_map_plot(box, field, title, filename):
     # lon = box.lon.copy()
     # lat = box.lat.copy()
     #
-    # import cartopy.crs as ccrs
+    #
     # ax = fig.add_subplot(111, projection=ccrs.PlateCarree())
     # pcm = ax.contourf(lon, lat, field, transform=ccrs.PlateCarree())
     # ax.coastlines()
