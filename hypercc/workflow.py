@@ -408,10 +408,21 @@ def generate_standard_map_plot(box, field, title, filename):
     import matplotlib
     my_cmap = matplotlib.cm.get_cmap('rainbow')
     my_cmap.set_under('w')
-    if np.max(abs(field)) > 0:
-        fig = plot_plate_carree(box, field, cmap=my_cmap, vmin=1e-30)
-    else:
-        fig = plot_plate_carree(box, field, cmap=my_cmap, vmin=-1e-30, vmax=1e-30)
+    # if np.max(abs(field)) > 0:
+    #     fig = plot_plate_carree(box, field, cmap=my_cmap, vmin=1e-30)
+    # else:
+    #     fig = plot_plate_carree(box, field, cmap=my_cmap, vmin=-1e-30, vmax=1e-30)
+
+    fig = plt.figure(figsize=(20, 10))
+    lon = box.lon.copy()
+    lat = box.lat.copy()
+
+    ax = fig.add_subplot(111, projection=ccrs.PlateCarree())
+    pcm = ax.contourf(lon, lat, value, transform=ccrs.PlateCarree())
+    ax.coastlines()
+    fig.colorbar(pcm)
+    plt.close()
+
     fig.suptitle(title, fontsize=20)
     fig.savefig(str(filename), bbox_inches='tight')
     return Path(filename)
