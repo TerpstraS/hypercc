@@ -504,7 +504,10 @@ def generate_region_plot(box, mask, title, filename, min_size=0):
         	          if (labels == x).sum() > min_size]
         regions = np.where(np.isin(labels, big_enough), labels, 0)
         regions_show=regions.max(axis=0)
-        fig = plot_plate_carree(box, regions_show, cmap=my_cmap, vmin=1)
+        fig = earth_plot(
+            box, regions_show, transform=ccrs.PlateCarree(), patch_greenwich=False,
+            cmap=my_cmap, vmin=1
+        )
         fig.suptitle(title)
         fig.savefig(str(filename), bbox_inches='tight')
         return Path(filename)
@@ -592,8 +595,10 @@ def generate_year_plot(box, years_maxabrupt, title, filename):
     my_cmap.set_under('w')
     maxval = np.max(years_maxabrupt)
     minval = np.min(years_maxabrupt[np.nonzero(years_maxabrupt)])
-    fig = plot_plate_carree(
-        box, years_maxabrupt, cmap=my_cmap, vmin=minval, vmax=maxval)
+    fig = earth_plot(
+        box, years_maxabrupt, transform=ccrs.PlateCarree(), patch_greenwich=False,
+        cmap=my_cmap, vmin=minval, vmax=maxval
+    )
     fig.suptitle(title, fontsize=20)
     fig.savefig(str(filename), bbox_inches='tight')
     return Path(filename)
@@ -759,7 +764,6 @@ def make_report(config, data_set, calibration, canny_edges):
     event_count_plot = generate_standard_map_plot(
         data_set.box, event_count, "event count",
         output_path / "event_count.png")
-
     abruptness_plot  = generate_standard_map_plot(
         data_set.box, abruptness,
         "abruptness", output_path / "abruptness.png")
@@ -770,9 +774,9 @@ def make_report(config, data_set, calibration, canny_edges):
         config, data_set.box, data_set.data, abruptness, abruptness_3d, "data at grid cell with largest abruptness",
         output_path / "timeseries.png")
 
-    # year_plot    = generate_year_plot(
-    #     data_set.box, years_maxabrupt, "year of largest abruptness",
-    #     output_path / "years_maxabrupt.png")
+    year_plot = generate_year_plot(
+        data_set.box, years_maxabrupt, "year of largest abruptness",
+        output_path / "years_maxabrupt.png")
     # scatter_plot_abrupt=generate_scatter_plot(
     #     mask,canny_edges['sobel'],abruptness_3d,abruptness_3d,"abruptness",gamma,lower_threshold,
     #     upper_threshold,"space versus time gradients", output_path / "scatter_abruptness.png")
@@ -805,6 +809,8 @@ def make_report(config, data_set, calibration, canny_edges):
         'abruptness_plot': abruptness_plot,
         'timeseries_plot': timeseries_plot,
         'event_count_timeseries_out': event_count_timeseries_out,
+
+        'year_plot': year_plot,
     }
 
 def generate_report(config):
