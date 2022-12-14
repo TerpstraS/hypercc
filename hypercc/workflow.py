@@ -419,7 +419,7 @@ def generate_standard_map_plot(box, field, title, filename):
 
     import cartopy.crs as ccrs
     ax = fig.add_subplot(111, projection=ccrs.PlateCarree())
-    pcm = ax.contourf(lon, lat, value, transform=ccrs.PlateCarree())
+    pcm = ax.contourf(lon, lat, field, transform=ccrs.PlateCarree())
     ax.coastlines()
     fig.colorbar(pcm)
     plt.close()
