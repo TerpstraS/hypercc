@@ -504,7 +504,7 @@ def generate_region_plot(box, mask, title, filename, min_size=0):
         	          if (labels == x).sum() > min_size]
         regions = np.where(np.isin(labels, big_enough), labels, 0)
         regions_show=regions.max(axis=0)
-        fig = earth_plot(
+        fig = plot_plate_carree(
             box, regions_show, transform=ccrs.PlateCarree(), patch_greenwich=False,
             cmap=my_cmap, vmin=1
         )
@@ -595,7 +595,7 @@ def generate_year_plot(box, years_maxabrupt, title, filename):
     my_cmap.set_under('w')
     maxval = np.max(years_maxabrupt)
     minval = np.min(years_maxabrupt[np.nonzero(years_maxabrupt)])
-    fig = earth_plot(
+    fig = plot_plate_carree(
         box, years_maxabrupt, transform=ccrs.PlateCarree(), patch_greenwich=False,
         cmap=my_cmap, vmin=minval, vmax=maxval
     )
