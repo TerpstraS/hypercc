@@ -1,7 +1,7 @@
 """
 Implements the HyperCanny workflow for climate data.
 """
-
+import os
 from pathlib import Path
 
 import matplotlib.pyplot as plt
