@@ -748,6 +748,10 @@ def make_report(config, data_set, calibration, canny_edges):
     abruptness_3d = measures['measure15j_3d']
     abruptness    = measures['measure15j']
 
+    # dont save if max. abruptness is below 2
+    if np.max(abruptness ) < 2:
+        return None
+
     years_maxabrupt = compute_years_maxabrupt(data_set.box, mask, abruptness_3d, abruptness)
 
     event_count_timeseries = mask.sum(axis=1).sum(axis=1)
@@ -790,7 +794,29 @@ def make_report(config, data_set, calibration, canny_edges):
     #     mask,canny_edges['sobel'],lons3d,abruptness_3d,"longitude",gamma,lower_threshold,
     #     upper_threshold,"space versus time gradients",output_path / "scatter_longitude.png")
 
-    event_count_timeseries_out = write_ts(event_count_timeseries, output_path / "event_count_timeseries.txt")
+    # event_count_timeseries_out = write_ts(event_count_timeseries, output_path / "event_count_timeseries.txt")
+
+    # Save all maps to a single file
+    image1 = plt.imread(os.path.join(output_path, "event_count.png"))
+    image2 = plt.imread(os.path.join(output_path, "years_maxabrupt.png"))
+    image3 = plt.imread(os.path.join(output_path, "abruptness.png"))
+    image4 = plt.imread(os.path.join(output_path, "maxTgrad.png"))
+    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
+    ax1.imshow(image1)
+    ax2.imshow(image2)
+    ax3.imshow(image3)
+    ax4.imshow(image4)
+    plt.savefig(os.path.join(output_path, "map_plots.png"), bbox_inches="tight")
+
+    # Save all time series plots to a single file
+    image1 = plt.imread(os.path.join(output_path, "timeseries.png"))
+    image2 = plt.imread(os.path.join(output_path, "signal.png"))
+    image3 = plt.imread(os.path.join(output_path, "event_count.png"))
+    fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
+    ax1.imshow(image1)
+    ax2.imshow(image2)
+    ax3.imshow(image3)
+    plt.savefig(os.path.join(output_path, "timeseries_plots.png"), bbox_inches="tight")
 
     return {
         'calibration': calibration,
@@ -808,7 +834,6 @@ def make_report(config, data_set, calibration, canny_edges):
 
         'abruptness_plot': abruptness_plot,
         'timeseries_plot': timeseries_plot,
-        'event_count_timeseries_out': event_count_timeseries_out,
 
         'year_plot': year_plot,
     }
