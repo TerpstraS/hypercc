@@ -806,23 +806,28 @@ def make_report(config, data_set, calibration, canny_edges):
     dpi = 100
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(int(width/dpi), int(height/dpi)))
     ax1.imshow(image1)
+    ax1.axis("off")
     ax2.imshow(image2)
+    ax2.axis("off")
     ax3.imshow(image3)
+    ax3.axis("off")
     ax4.imshow(image4)
-    plt.axis("off")
+    ax4.axis("off")
     plt.savefig(os.path.join(output_path, "map_plots.png"), bbox_inches="tight")
 
     # Save all time series plots to a single file
     image1 = plt.imread(os.path.join(output_path, "timeseries.png"))
     image2 = plt.imread(os.path.join(output_path, "signal.png"))
-    image3 = plt.imread(os.path.join(output_path, "event_count.png"))
+    image3 = plt.imread(os.path.join(output_path, "event_count_timeseries.png"))
     width = 625
     height = 1475
     fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(int(width/dpi), int(height/dpi)))
     ax1.imshow(image1)
+    ax1.axis("off")
     ax2.imshow(image2)
+    ax2.axis("off")
     ax3.imshow(image3)
-    plt.axis("off")
+    ax3.axis("off")
     plt.savefig(os.path.join(output_path, "timeseries_plots.png"), bbox_inches="tight")
 
     return {
