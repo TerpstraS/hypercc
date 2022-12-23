@@ -801,21 +801,28 @@ def make_report(config, data_set, calibration, canny_edges):
     image2 = plt.imread(os.path.join(output_path, "years_maxabrupt.png"))
     image3 = plt.imread(os.path.join(output_path, "abruptness.png"))
     image4 = plt.imread(os.path.join(output_path, "maxTgrad.png"))
-    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
+    width = 2900
+    height = 1800
+    dpi = 100
+    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(int(width/dpi), int(height/dpi)))
     ax1.imshow(image1)
     ax2.imshow(image2)
     ax3.imshow(image3)
     ax4.imshow(image4)
+    plt.axis("off")
     plt.savefig(os.path.join(output_path, "map_plots.png"), bbox_inches="tight")
 
     # Save all time series plots to a single file
     image1 = plt.imread(os.path.join(output_path, "timeseries.png"))
     image2 = plt.imread(os.path.join(output_path, "signal.png"))
     image3 = plt.imread(os.path.join(output_path, "event_count.png"))
-    fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
+    width = 625
+    height = 1475
+    fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(int(width/dpi), int(height/dpi)))
     ax1.imshow(image1)
     ax2.imshow(image2)
     ax3.imshow(image3)
+    plt.axis("off")
     plt.savefig(os.path.join(output_path, "timeseries_plots.png"), bbox_inches="tight")
 
     return {
