@@ -417,7 +417,7 @@ def generate_standard_map_plot(box, field, title, filename):
     if np.max(abs(field)) > 0:
         fig = plot_plate_carree(
             box, field, transform=ccrs.PlateCarree(), patch_greenwich=False,
-            cmap=my_cmap, vmin=1e-30
+            cmap=my_cmap, vmin=np.min(field)
         )
     else:
         fig = plot_plate_carree(
