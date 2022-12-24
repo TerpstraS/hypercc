@@ -417,7 +417,7 @@ def generate_standard_map_plot(box, field, title, filename):
     if np.max(abs(field)) > 0:
         fig = plot_plate_carree(
             box, field, transform=ccrs.PlateCarree(), patch_greenwich=False,
-            cmap=my_cmap, vmin=np.min(field)
+            cmap=my_cmap, vmin=1e-30
         )
     else:
         fig = plot_plate_carree(
@@ -760,9 +760,6 @@ def make_report(config, data_set, calibration, canny_edges):
     years_maxabrupt = compute_years_maxabrupt(data_set.box, mask, abruptness_3d, abruptness)
 
     # event_count_timeseries = mask.sum(axis=1).sum(axis=1)
-    mask_plot  = generate_standard_map_plot(
-        data_set.box, np.sum(mask, axis=0),
-        "mask", output_path / "mask.png")
     signal_plot  = generate_signal_plot(
         config, calibration, data_set.box, canny_edges['sobel'], "signal",
         output_path / "signal.png")
