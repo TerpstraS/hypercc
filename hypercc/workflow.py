@@ -376,7 +376,8 @@ def compute_measure15j(mask, years, data, cutoff_length, chunk_max_length, chunk
 
     measure15j=np.max(measure15j_3d,axis=0)
     measure15j[np.isnan(measure15j)]=0
-    indices_mask=np.where(measure15j>np.max(measure15j))  # set missing values to 0
+    # indices_mask=np.where(measure15j>np.max(measure15j))  # set missing values to 0
+    indices_mask=np.where(measure15j>100)  # set missing values to 0
     measure15j[indices_mask]=0                            # otherwise they show on map
 
     return {
@@ -754,8 +755,10 @@ def make_report(config, data_set, calibration, canny_edges):
 
     years_maxabrupt = compute_years_maxabrupt(data_set.box, mask, abruptness_3d, abruptness)
 
-    event_count_timeseries = mask.sum(axis=1).sum(axis=1)
-
+    # event_count_timeseries = mask.sum(axis=1).sum(axis=1)
+    mask_plot  = generate_standard_map_plot(
+        data_set.box, mask,
+        "mask", output_path / "mask.png")
     signal_plot  = generate_signal_plot(
         config, calibration, data_set.box, canny_edges['sobel'], "signal",
         output_path / "signal.png")
