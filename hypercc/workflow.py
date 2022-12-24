@@ -757,7 +757,7 @@ def make_report(config, data_set, calibration, canny_edges):
 
     # event_count_timeseries = mask.sum(axis=1).sum(axis=1)
     mask_plot  = generate_standard_map_plot(
-        data_set.box, mask,
+        data_set.box, np.sum(mask, axis=0),
         "mask", output_path / "mask.png")
     signal_plot  = generate_signal_plot(
         config, calibration, data_set.box, canny_edges['sobel'], "signal",
