@@ -373,6 +373,8 @@ def compute_measure15j(mask, years, data, cutoff_length, chunk_max_length, chunk
                             measure15j_3d[dim0,dim1,dim2]=9e99
                     else:
                         measure15j_3d[dim0,dim1,dim2]=abs(intercept_chunk1-intercept_chunk2)/mean_std
+                else:
+                    measure15j_3d[dim0,dim1,dim2] = - 1
             else:
                 measure15j_3d[dim0,dim1,dim2] = - 1
 
