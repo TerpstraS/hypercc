@@ -373,11 +373,13 @@ def compute_measure15j(mask, years, data, cutoff_length, chunk_max_length, chunk
                             measure15j_3d[dim0,dim1,dim2]=9e99
                     else:
                         measure15j_3d[dim0,dim1,dim2]=abs(intercept_chunk1-intercept_chunk2)/mean_std
+            else:
+                measure15j_3d[dim0,dim1,dim2] = - 1
 
     measure15j=np.max(measure15j_3d,axis=0)
     measure15j[np.isnan(measure15j)]=0
-    # indices_mask=np.where(measure15j>np.max(measure15j))  # set missing values to 0
-    indices_mask=np.where(measure15j>100)  # set missing values to 0
+    indices_mask=np.where(measure15j>np.max(measure15j))  # set missing values to 0
+    # indices_mask=np.where(measure15j>9999)  # set missing values to 0
     measure15j[indices_mask]=0                            # otherwise they show on map
 
     return {
