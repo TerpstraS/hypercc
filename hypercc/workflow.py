@@ -754,7 +754,7 @@ def make_report(config, data_set, calibration, canny_edges):
     abruptness    = measures['measure15j']
 
     # dont save if max. abruptness is below 2
-    if np.max(abruptness ) < 2:
+    if np.max(abruptness) < 2:
         return None
 
     years_maxabrupt = compute_years_maxabrupt(data_set.box, mask, abruptness_3d, abruptness)
@@ -834,6 +834,11 @@ def make_report(config, data_set, calibration, canny_edges):
     ax3.axis("off")
     plt.savefig(os.path.join(output_path, "timeseries_plots.png"), bbox_inches="tight")
 
+    # save data
+    abruptness_out = write_netcdf_2d(abruptness, output_path / "abruptness.nc")
+    edge_mask_out = write_netcdf_3d(mask, output_path / "edge_mask_detected.nc")
+    data_out = write_netcdf_3d(data_set.data, output_path / "data_out.nc")
+
     return {
         'calibration': calibration,
         'statistics': {
@@ -853,6 +858,7 @@ def make_report(config, data_set, calibration, canny_edges):
 
         'year_plot': year_plot,
     }
+
 
 def generate_report(config):
     output_path = Path(config.output_folder)
