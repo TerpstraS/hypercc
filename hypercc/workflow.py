@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
 import numpy as np
 from scipy import ndimage
+import xarray as xr
 
 from hyper_canny import cp_edge_thinning, cp_double_threshold
 
@@ -402,6 +403,91 @@ def write_netcdf_3d(field, filename):
     ncfile = netCDF4.Dataset(filename, "a", format="NETCDF4")
     ncfile.variables['outdata'][:,:,:]=field
     ncfile.close()
+
+
+def save_abruptness_to_netcdf4(abruptness, data_set, filename):
+
+    lon = data_set.box.lon
+    lat = data_set.box.lat
+
+    ds = xr.Dataset(
+        data_vars={
+            "abruptness": (
+                ["lon", "lat"], abruptness,
+                {
+                    "units": "K",
+                    "_FillValue": float(1e20),
+                    "missing_value": float(1e20)
+                }
+            )
+        },
+        coords={
+            "lon": (["lon"], lon, {"units": "degrees_east"}),
+            "lat": (["lat"], lat, {"units": "degrees_north"}),
+        },
+        attrs=dict(description="maximum abruptness")
+    )
+    ds.to_netcdf(filename)
+
+
+def save_mask_to_netcdf4(mask, data_set, filename):
+
+    time = data_set.box.time
+    time_units = data_set.box.time_units
+    time_start = data_set.box.time_start
+    lon = data_set.box.lon
+    lat = data_set.box.lat
+
+    ds = xr.Dataset(
+        data_vars={
+            "mask": (
+                ["time", "lon", "lat"], mask,
+                {
+                    "units": "K",
+                    "_FillValue": float(1e20),
+                    "missing_value": float(1e20)
+                }
+            )
+        },
+        coords={
+            "time": (["time"], time, {"units": "{} since {}".format(time_units, time_start)}),
+            "lon": (["lon"], lon, {"units": "degrees_east"}),
+            "lat": (["lat"], lat, {"units": "degrees_north"}),
+        },
+        attrs=dict(description="edges")
+    )
+    ds.to_netcdf(filename)
+
+
+def save_data_to_netcdf4(data_set, filename):
+
+    data = data_set.data
+
+    time = data_set.box.time
+    time_units = data_set.box.time_units
+    time_start = data_set.box.time_start
+    lon = data_set.box.lon
+    lat = data_set.box.lat
+
+    ds = xr.Dataset(
+        data_vars={
+            data_set.variable: (
+                ["time", "lon", "lat"], data,
+                {
+                    "units": "K",
+                    "_FillValue": float(1e20),
+                    "missing_value": float(1e20)
+                }
+            )
+        },
+        coords={
+            "time": (["time"], time, {"units": "{} since {}".format(time_units, time_start)}),
+            "lon": (["lon"], lon, {"units": "degrees_east"}),
+            "lat": (["lat"], lat, {"units": "degrees_north"}),
+        },
+        attrs=dict(description="data")
+    )
+    ds.to_netcdf(filename)
 
 
 def write_ts(ts, filename):
@@ -835,9 +921,9 @@ def make_report(config, data_set, calibration, canny_edges):
     plt.savefig(os.path.join(output_path, "timeseries_plots.png"), bbox_inches="tight")
 
     # save data
-    abruptness_out = write_netcdf_2d(abruptness, output_path / "abruptness.nc")
-    edge_mask_out = write_netcdf_3d(mask, output_path / "edge_mask_detected.nc")
-    data_out = write_netcdf_3d(data_set.data, output_path / "data_out.nc")
+    abruptness_out = save_abruptness_to_netcdf4(abruptness, data_set, output_path / "abruptness.nc")
+    edge_mask_out = save_edge_to_netcdf4(mask, data_set, output_path / "edge_mask_detected.nc")
+    data_out = save_data_to_netcdf4(data_set, output_path / "data_out.nc")
 
     return {
         'calibration': calibration,
