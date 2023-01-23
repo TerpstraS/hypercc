@@ -460,7 +460,7 @@ def save_mask_to_netcdf4(mask, data_set, filename):
     ds.to_netcdf(filename)
 
 
-def save_data_to_netcdf4(data_set, filename):
+def save_data_to_netcdf4(data_set, variable, filename):
 
     data = data_set.data
 
@@ -472,7 +472,7 @@ def save_data_to_netcdf4(data_set, filename):
 
     ds = xr.Dataset(
         data_vars={
-            data_set.variable: (
+            "{}".format(variable): (
                 ["time", "lat", "lon"], data,
                 {
                     "units": "K",
@@ -924,7 +924,7 @@ def make_report(config, data_set, calibration, canny_edges):
     # save data
     abruptness_out = save_abruptness_to_netcdf4(abruptness, data_set, output_path / "abruptness.nc")
     edge_mask_out = save_mask_to_netcdf4(mask, data_set, output_path / "edge_mask_detected.nc")
-    data_out = save_data_to_netcdf4(data_set, output_path / "data_out.nc")
+    data_out = save_data_to_netcdf4(data_set, config.variable, output_path / "data_out.nc")
 
     return {
         'calibration': calibration,
