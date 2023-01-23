@@ -413,7 +413,7 @@ def save_abruptness_to_netcdf4(abruptness, data_set, filename):
     ds = xr.Dataset(
         data_vars={
             "abruptness": (
-                ["lon", "lat"], abruptness,
+                ["lat", "lon"], abruptness,
                 {
                     "units": "K",
                     "_FillValue": float(1e20),
@@ -441,7 +441,7 @@ def save_mask_to_netcdf4(mask, data_set, filename):
     ds = xr.Dataset(
         data_vars={
             "mask": (
-                ["time", "lon", "lat"], mask,
+                ["time", "lat", "lon"], mask,
                 {
                     "units": "K",
                     "_FillValue": float(1e20),
@@ -472,7 +472,7 @@ def save_data_to_netcdf4(data_set, filename):
     ds = xr.Dataset(
         data_vars={
             data_set.variable: (
-                ["time", "lon", "lat"], data,
+                ["time", "lat", "lon"], data,
                 {
                     "units": "K",
                     "_FillValue": float(1e20),
