@@ -432,6 +432,9 @@ def save_abruptness_to_netcdf4(abruptness, data_set, filename):
 
 def save_mask_to_netcdf4(mask, data_set, filename):
 
+    print(mask.max())
+    print(type(mask))
+    mask = float(mask)
     time = data_set.box.time
     time_units = data_set.box.time_units
     time_start = data_set.box.time_start
