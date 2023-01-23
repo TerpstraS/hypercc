@@ -920,10 +920,10 @@ def make_report(config, data_set, calibration, canny_edges):
     ax3.axis("off")
     plt.savefig(os.path.join(output_path, "timeseries_plots.png"), bbox_inches="tight")
 
-    # # save data
-    # abruptness_out = save_abruptness_to_netcdf4(abruptness, data_set, output_path / "abruptness.nc")
-    # edge_mask_out = save_edge_to_netcdf4(mask, data_set, output_path / "edge_mask_detected.nc")
-    # data_out = save_data_to_netcdf4(data_set, output_path / "data_out.nc")
+    # save data
+    abruptness_out = save_abruptness_to_netcdf4(abruptness, data_set, output_path / "abruptness.nc")
+    edge_mask_out = save_edge_to_netcdf4(mask, data_set, output_path / "edge_mask_detected.nc")
+    data_out = save_data_to_netcdf4(data_set, output_path / "data_out.nc")
 
     return {
         'calibration': calibration,
