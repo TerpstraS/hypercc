@@ -42,6 +42,10 @@ def make_argument_parser():
         "--output-folder", help="folder where to put output of script "
         "(default: %(default)s)",
         default='.', dest='output_folder')
+    parser.add_argument(
+        "--output_raw-folder", help="folder where to put raw output of script "
+        "(default: %(default)s)",
+        default='.', dest='output_raw_folder')
 
     parser.add_argument(
         "--single", help="force running in single threaded mode",

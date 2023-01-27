@@ -818,6 +818,7 @@ def generate_event_count_timeseries_plot(box, mask, title, filename):
 
 def make_report(config, data_set, calibration, canny_edges):
     output_path  = Path(config.output_folder)
+    output_raw_path  = Path(config.output_raw_folder)
 
     gamma = get_calibration_factor(config, calibration)
     years = np.array([dd.year for dd in data_set.box.dates])
@@ -922,9 +923,9 @@ def make_report(config, data_set, calibration, canny_edges):
     plt.savefig(os.path.join(output_path, "timeseries_plots.png"), bbox_inches="tight")
 
     # save data
-    abruptness_out = save_abruptness_to_netcdf4(abruptness, data_set, output_path / "abruptness.nc")
-    edge_mask_out = save_mask_to_netcdf4(mask, data_set, output_path / "edge_mask_detected.nc")
-    data_out = save_data_to_netcdf4(data_set, config.variable, output_path / "data_out.nc")
+    abruptness_out = save_abruptness_to_netcdf4(abruptness, data_set, output_raw_path / config.model / "abruptness.nc")
+    edge_mask_out = save_mask_to_netcdf4(mask, data_set, output_raw_path / config.model / "edge_mask_detected.nc")
+    data_out = save_data_to_netcdf4(data_set, config.variable, output_raw_path / config.model / "data_out.nc")
 
     return {
         'calibration': calibration,
