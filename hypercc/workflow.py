@@ -837,7 +837,8 @@ def make_report(config, data_set, calibration, canny_edges):
     maxTgrad      = compute_maxTgrad(canny_edges)
 
     ## abruptness
-    measures      = compute_measure15j(mask, years, data_set.data, 2, 30, 15)
+    # Changed 2 to 4
+    measures      = compute_measure15j(mask, years, data_set.data, 4, 30, 15)
     abruptness_3d = measures['measure15j_3d']
     abruptness    = measures['measure15j']
 
