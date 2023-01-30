@@ -924,8 +924,12 @@ def make_report(config, data_set, calibration, canny_edges):
     plt.savefig(os.path.join(output_path, "timeseries_plots.png"), bbox_inches="tight")
 
     # save data
-    abruptness_out = save_abruptness_to_netcdf4(abruptness, data_set, os.path.join(output_raw_path, config.model, "abruptness.nc"))
-    edge_mask_out = save_mask_to_netcdf4(mask, data_set, os.path.join(output_raw_path, config.model, "edge_mask_detected.nc"))
+    np.savez_compressed(
+        os.path.join(output_raw_path, config.model, "output.npz"),
+        abruptness_3d=abruptness_3d, edges_3d=mask
+    )
+    # abruptness_out = save_abruptness_to_netcdf4(abruptness, data_set, os.path.join(output_raw_path, config.model, "abruptness.nc"))
+    # edge_mask_out = save_mask_to_netcdf4(mask, data_set, os.path.join(output_raw_path, config.model, "edge_mask_detected.nc"))
     data_out = save_data_to_netcdf4(data_set, config.variable, os.path.join(output_raw_path, config.model, "data_out.nc"))
 
     return {
