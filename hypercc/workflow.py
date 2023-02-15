@@ -852,7 +852,7 @@ def make_report(config, data_set, calibration, canny_edges):
 
     ## abruptness
     # Changed 2 to 4
-    measures      = compute_measure15j(mask, years, data_set.data, 4, 30, 15)
+    measures      = compute_measure15j(mask, years, data_set.data, 3, 30, 15)
     abruptness_3d = measures['measure15j_3d']
     abruptness    = measures['measure15j']
 
