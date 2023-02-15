@@ -336,20 +336,34 @@ def compute_measure15j(mask, years, data, cutoff_length, chunk_max_length, chunk
                     index_edges = np.where(chunk1_mask_short)   # locate all other edges in chunk 1
                     index_edge=np.max(index_edges)        # take the last one (closest to abrupt shift under consideration here)
                     if index_edge + cutoff_length >= np.size(chunk1_data_short):   # also consider the cutoff length for that other edge
-                        chunk1_data_short=[]
+                        # chunk1_data_short=[]
+                        # if not enough data is left let the other edge(s) here
+                        pass
                     else:
-                        chunk1_data_short=chunk1_data_short[index_edge+cutoff_length:]
-                        chunk1_years_short=chunk1_years_short[index_edge+cutoff_length:]
+                        # if chunck lenght will be too small after cutting off,
+                        # don't cut data
+                        if np.size(chunk1_data_short[index_edge+cutoff_length:]) < chunk_min_length:
+                            pass
+                        else:
+                            chunk1_data_short=chunk1_data_short[index_edge+cutoff_length:]
+                            chunk1_years_short=chunk1_years_short[index_edge+cutoff_length:]
 
                 if np.sum(chunk2_mask_short) > 0:
                     #print("There are other edges in chunk 2")
                     index_edges = np.where(chunk2_mask_short)   # locate all other edges in chunk 1
                     index_edge=np.min(index_edges)        # take the last one (closest to abrupt shift under consideration here)
                     if index_edge - cutoff_length < 0 :   # also consider the cutoff length for that other edge
-                        chunk2_data_short=[]
+                        # chunk2_data_short=[]
+                        # if not enough data is left let the other edge(s) here
+                        pass
                     else:
-                        chunk2_data_short=chunk2_data_short[0:index_edge-cutoff_length]
-                        chunk2_years_short=chunk2_years_short[0:index_edge-cutoff_length]
+                        # if chunck lenght will be too small after cutting off,
+                        # don't cut data
+                        if np.size(chunk2_data_short[0:index_edge-cutoff_length]) < chunk_min_length:
+                            pass
+                        else:
+                            chunk2_data_short=chunk2_data_short[0:index_edge-cutoff_length]
+                            chunk2_years_short=chunk2_years_short[0:index_edge-cutoff_length]
 
 
                 N1=np.size(chunk1_data_short)
