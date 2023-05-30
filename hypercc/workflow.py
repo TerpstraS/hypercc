@@ -377,9 +377,14 @@ def compute_measure15j(mask, years, data, cutoff_length, chunk_max_length, chunk
                     slope_chunk2, intercept_chunk2, r_value, p_value, std_err = stats.linregress(chunk2_years_short, chunk2_data_short)
                     # chunk2_regline=intercept_chunk2 + slope_chunk2*chunk2_years_short
 
-                    mean_std=(np.nanstd(chunk1_data_short, ddof=1)+np.nanstd(chunk2_data_short, ddof=1))/2
+                    # mean_std=(np.nanstd(chunk1_data_short, ddof=1)+np.nanstd(chunk2_data_short, ddof=1))/2
+                    chunk1_std = np.nanstd(chunk1_data_short, ddof=1)
+                    chunk2_std = np.nanstd(chunk2_data_short, ddof=1)
+                    pooled_std = np.sqrt(
+                        ((N1 - 1) * chunk1_std**2 + (N2 - 1) * chunk2_std**2) / (N1 + N2 - 2)
+                    )
 
-                    if mean_std == 0:
+                    if pooled_std == 0:
                         mean_chunk1=np.mean(chunk1_data_short)
                         mean_chunk2=np.mean(chunk2_data_short)
                         if mean_chunk1 == mean_chunk2:
@@ -387,7 +392,7 @@ def compute_measure15j(mask, years, data, cutoff_length, chunk_max_length, chunk
                         else:
                             measure15j_3d[dim0,dim1,dim2]=9e99
                     else:
-                        measure15j_3d[dim0,dim1,dim2]=abs(intercept_chunk1-intercept_chunk2)/mean_std
+                        measure15j_3d[dim0,dim1,dim2]=abs(intercept_chunk1-intercept_chunk2)/pooled_std
                 else:
                     measure15j_3d[dim0,dim1,dim2] = - 1
             else:
