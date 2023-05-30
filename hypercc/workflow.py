@@ -7,7 +7,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
 import numpy as np
-from scipy import ndimage
+from scipy import ndimage, stats
 import xarray as xr
 
 from hyper_canny import cp_edge_thinning, cp_double_threshold
@@ -284,7 +284,6 @@ def compute_maxTgrad(canny):
 ### There are many possible ways to quantify abruptness.
 # This one has been labeled "measure 15j" during the testing:
 def compute_measure15j(mask, years, data, cutoff_length, chunk_max_length, chunk_min_length):
-    from scipy import stats
 
     idx = np.where(mask)
     indices=np.asarray(idx)
