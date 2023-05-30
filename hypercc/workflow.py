@@ -729,19 +729,19 @@ def make_report(config, data_set, calibration, canny_edges):
     output_path  = Path(config.output_folder)
     output_raw_path  = Path(config.output_raw_folder)
 
-    gamma = get_calibration_factor(config, calibration)
+    # gamma = get_calibration_factor(config, calibration)
     years = np.array([dd.year for dd in data_set.box.dates])
     #years_timeseries_out = write_ts(years, output_path / "years_timeseries.txt")
 
     mask=canny_edges['edges']
     event_count=mask.sum(axis=0)
 
-    lower_threshold, upper_threshold = get_thresholds(config, calibration)
-    years3d=years[:,None,None]*mask
-    lats=data_set.box.lat
-    lats3d=lats[None,:,None]*mask
-    lons=data_set.box.lon
-    lons3d=lons[None,None,:]*mask
+    # lower_threshold, upper_threshold = get_thresholds(config, calibration)
+    # years3d=years[:,None,None]*mask
+    # lats=data_set.box.lat
+    # lats3d=lats[None,:,None]*mask
+    # lons=data_set.box.lon
+    # lons3d=lons[None,None,:]*mask
 
     maxTgrad      = compute_maxTgrad(canny_edges)
 
@@ -761,9 +761,9 @@ def make_report(config, data_set, calibration, canny_edges):
     signal_plot  = generate_signal_plot(
         config, calibration, data_set.box, canny_edges['sobel'], "signal",
         output_path / "signal.png")
-    region_plot  = generate_region_plot(
-        data_set.box, canny_edges['edges'], "regions",
-        output_path / "regions.png")
+    # region_plot  = generate_region_plot(
+    #     data_set.box, canny_edges['edges'], "regions",
+    #     output_path / "regions.png")
     event_count_timeseries_plot = generate_event_count_timeseries_plot(
         data_set.box, canny_edges['edges'], "event count",
         output_path / "event_count_timeseries.png")
@@ -849,7 +849,6 @@ def make_report(config, data_set, calibration, canny_edges):
             'max_abruptness': abruptness.max()
         },
         'signal_plot': signal_plot,
-        'region_plot': region_plot,
 
         'event_count_plot': event_count_plot,
         'event_count_timeseries_plot': event_count_timeseries_plot,
