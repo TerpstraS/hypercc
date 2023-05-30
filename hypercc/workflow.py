@@ -18,6 +18,7 @@ from .filters import gaussian_filter, sobel_filter, taper_masked_area
 from .calibration import calibrate_sobel
 from .plotting import plot_signal_histogram, plot_plate_carree
 
+
 def run(workflow):
     return workflow
 
@@ -377,7 +378,7 @@ def compute_measure15j(mask, years, data, cutoff_length, chunk_max_length, chunk
                     slope_chunk2, intercept_chunk2, r_value, p_value, std_err = stats.linregress(chunk2_years_short, chunk2_data_short)
                     chunk2_regline=intercept_chunk2 + slope_chunk2*chunk2_years_short
 
-                    mean_std=(np.nanstd(chunk1_data_short)+np.nanstd(chunk2_data_short))/2
+                    mean_std=(np.nanstd(chunk1_data_short, ddof=1)+np.nanstd(chunk2_data_short, ddof=1))/2
 
                     if mean_std == 0:
                         mean_chunk1=np.mean(chunk1_data_short)
@@ -396,12 +397,11 @@ def compute_measure15j(mask, years, data, cutoff_length, chunk_max_length, chunk
     measure15j=np.max(measure15j_3d,axis=0)
     measure15j[np.isnan(measure15j)]=0
     indices_mask=np.where(measure15j>np.max(measure15j))  # set missing values to 0
-    # indices_mask=np.where(measure15j>9999)  # set missing values to 0
     measure15j[indices_mask]=0                            # otherwise they show on map
 
     return {
         'measure15j_3d': measure15j_3d,
-	'measure15j':    measure15j
+	    'measure15j': measure15j
     }
 
 
@@ -719,115 +719,6 @@ def generate_event_count_timeseries_plot(box, mask, title, filename):
     ax.set_ylabel('events', fontsize=20)
     fig.savefig(str(filename), bbox_inches='tight')
     return Path(filename)
-
-# @noodles.schedule(call_by_ref=['data_set', 'canny_edges'])
-# @noodles.maybe
-# def make_report(config, data_set, calibration, canny_edges):
-#     output_path  = Path(config.output_folder)
-#
-#     gamma = get_calibration_factor(config, calibration)
-#     years = np.array([dd.year for dd in data_set.box.dates])
-#     #years_timeseries_out = write_ts(years, output_path / "years_timeseries.txt")
-#
-#     mask=canny_edges['edges']
-#     event_count=mask.sum(axis=0)
-#
-#     lower_threshold, upper_threshold = get_thresholds(config, calibration)
-#     years3d=years[:,None,None]*mask
-#     lats=data_set.box.lat
-#     lats3d=lats[None,:,None]*mask
-#     lons=data_set.box.lon
-#     lons3d=lons[None,None,:]*mask
-#
-#     maxTgrad      = compute_maxTgrad(canny_edges)
-#
-#     ## abruptness
-#     measures      = compute_measure15j(mask, years, data_set.data, 2, 30, 15)
-#     abruptness_3d = measures['measure15j_3d']
-#     abruptness    = measures['measure15j']
-#
-#     years_maxabrupt = compute_years_maxabrupt(data_set.box, mask, abruptness_3d, abruptness)
-#
-#     event_count_timeseries = mask.sum(axis=1).sum(axis=1)
-#
-#     signal_plot  = generate_signal_plot(
-#         config, calibration, data_set.box, canny_edges['sobel'], "signal",
-#         output_path / "signal.png")
-#     region_plot  = generate_region_plot(
-#         data_set.box, canny_edges['edges'], "regions",
-#         output_path / "regions.png")
-#     event_count_timeseries_plot = generate_event_count_timeseries_plot(
-#         data_set.box, canny_edges['edges'], "event count",
-#         output_path / "event_count_timeseries.png")
-#     event_count_plot = generate_standard_map_plot(
-#         data_set.box, event_count, "event count",
-#         output_path / "event_count.png")
-#
-#     abruptness_plot  = generate_standard_map_plot(
-#         data_set.box, abruptness,
-#         "abruptness", output_path / "abruptness.png")
-#     maxTgrad_plot    = generate_standard_map_plot(
-#         data_set.box, maxTgrad,
-#         "max. time gradient", output_path / "maxTgrad.png")
-#     timeseries_plot = generate_timeseries_plot(
-#         config, data_set.box, data_set.data, abruptness, abruptness_3d, "data at grid cell with largest abruptness",
-#         output_path / "timeseries.png")
-#
-#     year_plot    = generate_year_plot(
-#         data_set.box, years_maxabrupt, "year of largest abruptness",
-#         output_path / "years_maxabrupt.png")
-#     scatter_plot_abrupt=generate_scatter_plot(
-#         mask,canny_edges['sobel'],abruptness_3d,abruptness_3d,"abruptness",gamma,lower_threshold,
-#         upper_threshold,"space versus time gradients", output_path / "scatter_abruptness.png")
-#     scatter_plot_years=generate_scatter_plot(
-#         mask,canny_edges['sobel'],years3d,abruptness_3d,"year",gamma,lower_threshold,
-#         upper_threshold,"space versus time gradients",output_path / "scatter_year.png")
-#     scatter_plot_lats=generate_scatter_plot(
-#         mask,canny_edges['sobel'],lats3d,abruptness_3d,"latitude",gamma,lower_threshold,
-#         upper_threshold,"space versus time gradients",output_path / "scatter_latitude.png")
-#     scatter_plot_lons=generate_scatter_plot(
-#         mask,canny_edges['sobel'],lons3d,abruptness_3d,"longitude",gamma,lower_threshold,
-#         upper_threshold,"space versus time gradients",output_path / "scatter_longitude.png")
-#
-#     maxTgrad_out             = write_netcdf_2d(maxTgrad, output_path / "maxTgrad.nc")
-#
-#     abruptness_out      = write_netcdf_2d(abruptness, output_path / "abruptness.nc")
-#
-#     years_maxabrupt_out = write_netcdf_2d(years_maxabrupt, output_path / "years_maxabrupt.nc")
-#     event_count_out          = write_netcdf_2d(event_count, output_path / "event_count.nc")
-#     event_count_timeseries_out = write_ts(event_count_timeseries, output_path / "event_count_timeseries.txt")
-#
-#     edge_mask_out      = write_netcdf_3d(mask, output_path / "edge_mask_detected.nc")
-#
-#     return noodles.lift({
-#         'calibration': calibration,
-#         'statistics': {
-#             'max_maxTgrad': maxTgrad.max(),
-#
-#             'max_abruptness': abruptness.max()
-#         },
-#         'signal_plot': signal_plot,
-#         'region_plot': region_plot,
-#         'maxTgrad_out': maxTgrad_out,
-#
-#         'year_plot': year_plot,
-#         'event_count_plot': event_count_plot,
-#         'event_count_timeseries_plot': event_count_timeseries_plot,
-#         'maxTgrad_plot': maxTgrad_plot,
-#
-#         'abruptness_plot': abruptness_plot,
-#         'timeseries_plot': timeseries_plot,
-#         'scatter_plot_abrupt': scatter_plot_abrupt,
-#         'scatter_plot_years': scatter_plot_years,
-#         'scatter_plot_lats': scatter_plot_lats,
-#         'scatter_plot_lons': scatter_plot_lons,
-#         'abruptness_out': abruptness_out,
-#         'years_maxabrupt_out': years_maxabrupt_out,
-#
-#         'event_count_out': event_count_out,
-#         'event_count_timeseries_out': event_count_timeseries_out,
-#         'edge_mask_out': edge_mask_out
-#     })
 
 
 def make_report(config, data_set, calibration, canny_edges):
