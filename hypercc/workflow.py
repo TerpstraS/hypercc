@@ -752,7 +752,7 @@ def make_report(config, data_set, calibration, canny_edges):
     abruptness    = measures['measure15j']
 
     # dont save if max. abruptness is below 3.5
-    if np.max(abruptness) < 3.5:
+    if np.max(abruptness) < 3.0:
         return None
 
     years_maxabrupt = compute_years_maxabrupt(data_set.box, mask, abruptness_3d, abruptness)
